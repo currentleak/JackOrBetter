@@ -25,6 +25,8 @@ struct termios stdinSettingsOld;
 
 int main(void)
 {
+    int credit = 7;
+    int bet =1;
     int deck[52];
     int hand[5];
     int result;
@@ -35,12 +37,16 @@ int main(void)
 
     do
     {
-        
         createDeck(deck);
+        wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
+        wprintf(L"\nBet 'M'ore or 'L'ess, and press Space bar to draw");
+        //key = waitButton();
 
-        wprintf(L"\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
-
+        wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
         getHand(deck, hand);
+        credit = credit - bet;
+        wprintf(L"\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
+        
         getUserChoiceAndDraw(deck, hand);
         result = checkHandWinOrLose(hand);
         wprintf(L"\nResult= %d", result);
@@ -55,16 +61,25 @@ int main(void)
                 result = result * playDouble(deck);
                 wprintf(L"\nResult= %d", result);
             }
+            credit = credit + result;
         }
-        wprintf(L"\nPress 'Space Bar' to Play Again or any other Key to Quit");
+        wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
+        if(credit == 0)
+        {
+            wprintf(L"\nNo more credit!");
+        }
+        else
+            wprintf(L"\nPress 'Space Bar' to Play Again or any other Key to Quit");
     }
-    while(waitButton() == 32); // ASCII 'Space Bar'
+    while(waitButton() == 32 && credit > 0); // ASCII 'Space Bar'
 
     wprintf(L"\npoker END\n");
     closeButton();
     return 0;
 }
 
+/// @brief 
+/// @param deck 
 void createDeck(int *deck)
 {
     for(int i=0; i<52; i++) // create deck
@@ -84,6 +99,9 @@ void createDeck(int *deck)
     }
 }
 
+/// @brief 
+/// @param deck 
+/// @param hand 
 void getHand(int *deck, int *hand)
 {
     wprintf(L"\n            1     2     3     4     5");
@@ -95,12 +113,16 @@ void getHand(int *deck, int *hand)
     }
 }
 
+/// @brief sélection des cartes à garder et remise des nouvelles cartes
+/// @param deck le packet de carte
+/// @param hand les cartes du joueur
 void getUserChoiceAndDraw(int *deck, int *hand)
 {
     // get card position to hold from player
-    int posDrawCard[5];
+    int i;
     int h[5] = {DISCARD, DISCARD, DISCARD, DISCARD, DISCARD};
     int selection;
+    wprintf(L"\n");
     do 
     {
         selection = waitButton();
@@ -124,11 +146,22 @@ void getUserChoiceAndDraw(int *deck, int *hand)
             default :
                 break;
         }
+        wprintf(L"\r            ");
+        for(i = 0; i < 5; i++)
+        {
+            if(h[i]==HOLD)
+            {
+                wprintf(L"H     ");
+            }
+            else
+            {
+                wprintf(L"      ");
+            }
+        }
     }
     while(selection != 32);  // ASCII 'Space Bar'
     // draw new card
     int drawCardNumber = 7; // 1 burn, 5 cards, +1burn
-    int i;
     wprintf(L"\nhand 2nd : ");
     for(i = 0; i < 5; i++)
     {
@@ -308,47 +341,65 @@ int checkHandWinOrLose(int *hand)
         wprintf(L"Lose");
         break;
     }
- 
-
-    return result;
+     return result;
 }
 
 int playDouble(int *deck)
 {
     int key;
     int result = 1;
-    createDeck(deck);
+    int cardNumber = 13; //burn+5+burn+5
     wprintf(L"\nPress 'H'igh or 'L'ow, any other key to keep");
-    wprintf(L"\ndouble: %2d ", deck[1]);
-    key = waitButton();
-    wprintf(L" --%2d ", deck[3]);
-    if((key == 'H') || (key =='h'))
-    {
-        if(deck[1] < deck[3])
-            result = 2;
-        else
-            result = 0;
-    }   
-    else if((key == 'L') || (key =='l'))
-    {
-        if(deck[1] > deck[3])
-            result = 2;
-        else
-            result = 0;
+    wprintf(L"\ndouble: ");
+    printCard(deck[cardNumber]);
 
+    do 
+    {
+        /*if(reduceCard(deck[cardNumber]) < reduceCard(deck[cardNumber+1]))
+            wprintf(L" -< ");
+        else if(reduceCard(deck[cardNumber]) > reduceCard(deck[cardNumber+1]))
+            wprintf(L" >- ");
+        else
+            wprintf(L" -- ");*/
+
+        key = waitButton();
+        printCard(deck[cardNumber + 1]);
+
+        if((key == 'H') || (key =='h'))
+        {
+            if(reduceCard(deck[cardNumber]) < reduceCard(deck[cardNumber + 1]))
+                result = result * 2;
+            else
+                result = 0;
+        }   
+        else if((key == 'L') || (key =='l'))
+        {
+            if(reduceCard(deck[cardNumber]) > reduceCard(deck[cardNumber + 1]))
+                result = result * 2;
+            else
+                result = 0;
+        }
+        else
+        {
+            break;  // user pressed any key to keep
+        }
+        cardNumber = cardNumber + 2;  
+        if(cardNumber > 50)
+        {
+            break;
+        }      
     }
+    while (result != 0);
+
     return result;
 }
 
 int waitButton()
 {
     return getc(stdin);
-    //char ch;
-    //scanf("%c", &ch);
-    //return (int)ch;
-
 }
 
+/// @brief settings pour le terminal en mode non canonique
 void initButton()
 {
     // Setting the Attributes of the serial port using termios structure 
@@ -373,6 +424,8 @@ void closeButton()
     tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettingsOld);
 }
 
+/// @brief Imprime une carte, exemple: J♣
+/// @param card number from 1 to 52
 void printCard(int card)
 {
     int reducedCard = reduceCard(card);

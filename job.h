@@ -71,7 +71,7 @@
 #define BLANK_CARD      99
 #define SHUFFLE_COUNT   1000
 #define DISCARD         1
-#define KEEP            0
+#define HOLD            0
 
 
 void createDeck(int *deck);
