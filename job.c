@@ -58,7 +58,7 @@ int main(void)
             key = waitButton();
             if((key == 'D') || (key =='d'))
             {
-                result = result * playDouble(deck);
+                result = playDouble(deck, result);
                 wprintf(L"\nResult= %d", result);
             }
             credit = credit + result;
@@ -344,10 +344,9 @@ int checkHandWinOrLose(int *hand)
      return result;
 }
 
-int playDouble(int *deck)
+int playDouble(int *deck, int result)
 {
     int key;
-    int result = 1;
     int cardNumber = 13; //burn+5+burn+5
     wprintf(L"\nPress 'H'igh or 'L'ow, any other key to keep");
     wprintf(L"\ndouble: ");
