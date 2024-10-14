@@ -31,11 +31,13 @@ int main(void)
 
     srand(time(NULL));      // init random
 
-    initButton();
     //setlocale(LC_CTYPE, "");
-    //wchar_t star = 0x2660;
-    // wprintf(L"%lc\n", star);
+    //wprintf(L"%lc", Pique);
+    //wprintf(L"%lc", Coeur);
+    //wprintf(L"%lc", Carreau);
+    //wprintf(L"%lc", Trefle);
 
+    initButton();
     do
     {
         
@@ -195,9 +197,9 @@ int checkHandWinOrLose(int *hand)
     sortHand(hand);
     
 // flush
-    if(hand[0] >= DeuxCoeur && hand[4] <= AsCoeur)
+    if(hand[0] >= DeuxPique && hand[4] <= AsPique)
         result = Flush;
-    else if(hand[0] >= DeuxPique && hand[4] <= AsPique)
+    else if(hand[0] >= DeuxCoeur && hand[4] <= AsCoeur)
         result = Flush;
     else if(hand[0] >= DeuxCarreau && hand[4] <= AsCarreau)
         result = Flush;
@@ -210,7 +212,7 @@ int checkHandWinOrLose(int *hand)
         {
             result = StraightFlush;
 // Royal    
-            if(hand[4] == AsCoeur || hand[4] == AsPique || hand[4] == AsCarreau || hand[4] == AsTrefle)
+            if(hand[4] == AsPique || hand[4] == AsCoeur || hand[4] == AsCarreau || hand[4] == AsTrefle)
             {
                 result = RoyalFlush;
             }
@@ -226,7 +228,7 @@ int checkHandWinOrLose(int *hand)
     {
         if(hand[i] == hand[i+1])
         {
-            if(hand[i] > DixCoeur)
+            if(hand[i] > DixPique)
             {
                 result = JackOrBetter;
             }
