@@ -11,25 +11,38 @@
 */
 
 // Card MAP
+#define PiqueChar   0x2660
+#define CoeurChar   0x2661
+#define CarreauChar 0x2662
+#define TrefleChar  0x2663
 
-#define DeuxCoeur       1
-#define TroisCoeur      2
-#define QuatreCoeur     3
-#define CinqCoeur       4
-#define SixCoeur        5
-#define SeptCoeur       6
-#define HuitCoeur       7
-#define NeufCoeur       8
-#define DixCoeur        9
-#define JackCoeur       10
-#define DameCoeur       11
-#define RoiCoeur        12
-#define AsCoeur         13
+#define DeuxPique       1
+#define TroisPique      2
+#define QuartePique     3
+#define CinqPique       4
+#define SixPique        5
+#define SeptPique       6
+#define HuitPique       7
+#define NeufPique       8
+#define DixPique        9
+#define JackPique       10
+#define DamePique       11
+#define RoiPique        12
+#define AsPique         13
 
-#define DeuxPique       14
-
-#define RoiPique        25
-#define AsPique         26
+#define DeuxCoeur       14
+#define TroisCoeur      15
+#define QuatreCoeur     16
+#define CinqCoeur       17
+#define SixCoeur        18
+#define SeptCoeur       19
+#define HuitCoeur       20
+#define NeufCoeur       21
+#define DixCoeur        22
+#define JackCoeur       23
+#define DameCoeur       24
+#define RoiCoeur        25
+#define AsCoeur         26
 
 #define DeuxCarreau     27
 
@@ -65,9 +78,11 @@ void createDeck(int *deck);
 void getHand(int *deck, int *hand);
 void getUserChoiceAndDraw(int *deck, int *hand);
 void sortHand(int *hand);
+int reduceCard(int);
 void reduceHand(int *);
 int checkHandWinOrLose(int *hand);
 int playDouble(int *);
 int waitButton(void);
 void initButton(void);
 void closeButton(void);
+void printCard(int);

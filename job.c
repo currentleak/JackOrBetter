@@ -30,42 +30,37 @@ int main(void)
     int result;
 
     srand(time(NULL));      // init random
-
-    //setlocale(LC_CTYPE, "");
-    //wprintf(L"%lc", Pique);
-    //wprintf(L"%lc", Coeur);
-    //wprintf(L"%lc", Carreau);
-    //wprintf(L"%lc", Trefle);
-
+    setlocale(LC_CTYPE, "");
     initButton();
+
     do
     {
         
         createDeck(deck);
 
-        printf("\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
+        wprintf(L"\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
 
         getHand(deck, hand);
         getUserChoiceAndDraw(deck, hand);
         result = checkHandWinOrLose(hand);
-        printf("\nResult= %d", result);
+        wprintf(L"\nResult= %d", result);
 
         if(result != Lose)
         {
             int key;
-            printf("\nPress 'D' to Double or any other Key to Keep");
+            wprintf(L"\nPress 'D' to Double or any other Key to Keep");
             key = waitButton();
             if((key == 'D') || (key =='d'))
             {
                 result = result * playDouble(deck);
-                printf("\nResult= %d", result);
+                wprintf(L"\nResult= %d", result);
             }
         }
-        printf("\nPress 'Space Bar' to Play Again or any other Key to Quit");
+        wprintf(L"\nPress 'Space Bar' to Play Again or any other Key to Quit");
     }
     while(waitButton() == 32); // ASCII 'Space Bar'
 
-    printf("\npoker END\n");
+    wprintf(L"\npoker END\n");
     closeButton();
     return 0;
 }
@@ -74,7 +69,7 @@ void createDeck(int *deck)
 {
     for(int i=0; i<52; i++) // create deck
     {
-        deck[i] = i+1;
+        deck[i] = i+1; // deck = 1 to 52
     }
 
     int TempoCardValue;
@@ -91,11 +86,12 @@ void createDeck(int *deck)
 
 void getHand(int *deck, int *hand)
 {
-    printf("\nhand 1st : ");
+    wprintf(L"\n            1     2     3     4     5");
+    wprintf(L"\nhand 1st : ");
     for(int i=0; i<5; i++)
     {
         hand[i] = deck[i+1];  // +1 burn first card
-        printf("%2d ", hand[i]);
+        printCard(hand[i]);
     }
 }
 
@@ -133,8 +129,7 @@ void getUserChoiceAndDraw(int *deck, int *hand)
     // draw new card
     int drawCardNumber = 7; // 1 burn, 5 cards, +1burn
     int i;
-    //printf("\rhand: ");
-    printf("\nhand 2nd : ");
+    wprintf(L"\nhand 2nd : ");
     for(i = 0; i < 5; i++)
     {
         if(h[i] == DISCARD)
@@ -142,14 +137,13 @@ void getUserChoiceAndDraw(int *deck, int *hand)
             hand[i] = deck[drawCardNumber];
             drawCardNumber++;
         }
-        printf("%2d ", hand[i]);
+        printCard(hand[i]);
     }
 }
 
 void sortHand(int *hand)
 {
     int i, j, temp;
-    printf("\nhand sort: ");
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 4 - i; j++) {
             if (hand[j] > hand[j + 1]) {
@@ -160,42 +154,46 @@ void sortHand(int *hand)
             }
         }
     }
+    /*wprintf(L"\nhand sort: ");
     for(i = 0; i < 5; i++)
     {
-        printf("%2d ", hand[i]);
-    } 
+        wprintf(L"%2d ", hand[i]);
+    }*/ 
 }
 
+int reduceCard (int card)
+{
+        if(card > AsCarreau)
+        {
+            card = card - AsCarreau;
+        }
+        else if(card > AsCoeur)
+        {
+            card = card - AsCoeur;
+        }
+        else if(card > AsPique)
+        {
+            card = card - AsPique;
+        }
+}
 void reduceHand(int *hand)
 {
     int i;
-    printf("\nhand red.: ");
     for(i = 0; i < 5; i++)
     {
-        if(hand[i] > AsCarreau)
-        {
-            hand[i] = hand[i] - AsCarreau;
-        }
-        else if(hand[i] > AsPique)
-        {
-            hand[i] = hand[i] - AsPique;
-        }
-        else if(hand[i] > AsCoeur)
-        {
-            hand[i] = hand[i] - AsCoeur;
-        }
+        hand[i] = reduceCard(hand[i]);
     }
+    /*wprintf(L"\nhand red.: ");
     for(i = 0; i < 5; i++)
     {
-        printf("%2d ", hand[i]);
-    } 
+        wprintf(L"%2d ", hand[i]);
+    }*/ 
 }
 
 int checkHandWinOrLose(int *hand)
 {
     int result = Lose;
     sortHand(hand);
-    
 // flush
     if(hand[0] >= DeuxPique && hand[4] <= AsPique)
         result = Flush;
@@ -280,34 +278,34 @@ int checkHandWinOrLose(int *hand)
     switch (result)
     {
     case JackOrBetter:
-        printf("JackOrBetter");
+        wprintf(L"JackOrBetter");
         break;
     case TwoPairs:
-        printf("TwoPairs");
+        wprintf(L"TwoPairs");
         break;
     case ThreeOfAKind:
-        printf("ThreeOfAKind");
+        wprintf(L"ThreeOfAKind");
         break;
     case Straight:
-        printf("Straight");
+        wprintf(L"Straight");
         break;
     case Flush:
-        printf("Flush");
+        wprintf(L"Flush");
         break;
     case FullHouse:
-        printf("FullHouse");
+        wprintf(L"FullHouse");
         break;
     case FourOfAKind:
-        printf("FourOfAKind");
+        wprintf(L"FourOfAKind");
         break;
     case StraightFlush:
-        printf("StraightFlush");
+        wprintf(L"StraightFlush");
         break;
     case RoyalFlush:
-        printf("RoyalFlush");
+        wprintf(L"RoyalFlush");
         break;
     default:
-        printf("Lose");
+        wprintf(L"Lose");
         break;
     }
  
@@ -320,10 +318,10 @@ int playDouble(int *deck)
     int key;
     int result = 1;
     createDeck(deck);
-    printf("\nPress 'H'igh or 'L'ow, any other key to keep");
-    printf("\ndouble: %2d ", deck[1]);
+    wprintf(L"\nPress 'H'igh or 'L'ow, any other key to keep");
+    wprintf(L"\ndouble: %2d ", deck[1]);
     key = waitButton();
-    printf(" --%2d ", deck[3]);
+    wprintf(L" --%2d ", deck[3]);
     if((key == 'H') || (key =='h'))
     {
         if(deck[1] < deck[3])
@@ -367,10 +365,56 @@ void initButton()
 	stdinSettings.c_cc[VTIME] = 0; // Wait 30 for 3sec (0 for indefinetly) 
 
 	if((tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettings)) != 0) // Set the attributes to the termios structure
-		printf("\n  Erreur! configuration des attributs du port serie");
+		wprintf(L"\n  Erreur! configuration des attributs du port serie");
 }
 
 void closeButton()
 {
     tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettingsOld);
+}
+
+void printCard(int card)
+{
+    int reducedCard = reduceCard(card);
+
+    if(reducedCard == AsPique)
+    {
+        wprintf(L"AS");
+    }
+    else if(reducedCard == RoiPique)
+    {
+        wprintf(L" K");
+    }
+    else if(reducedCard == DamePique)
+    {
+        wprintf(L" D");
+    }
+    else if(reducedCard == JackPique)
+    {
+        wprintf(L" J");
+    }
+    else
+        wprintf(L"%2d", reducedCard + 1); // value 1 in the deck is the card 2, value 13 is the ACE
+
+
+    if(card <= AsPique)
+    {
+        wprintf(L"%lc...", PiqueChar);
+    }
+    else if(card <= AsCoeur)
+    {
+        card = card - AsPique;
+        wprintf(L"%lc...", CoeurChar);
+    }
+    else if(card <= AsCarreau)
+    {
+        card = card - AsCoeur;
+        wprintf(L"%lc...", CarreauChar);
+    }
+    else if(card <= AsTrefle)
+    {
+        card = card - AsCarreau;
+        wprintf(L"%lc...", TrefleChar);
+    }
+    
 }
