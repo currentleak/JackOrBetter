@@ -13,12 +13,15 @@
 
 #include <time.h>
 #include <stdlib.h>
-#include <conio.h>
 #include <stdio.h>
+//#include <conio.h>
+#include <unistd.h>
 //#include "ncurses.h"
 #include <wchar.h>
 #include <locale.h>
+#include <termios.h> // POSIX Terminal Control Definitions 
 
+struct termios stdinSettingsOld;
 
 int main(void)
 {
@@ -28,20 +31,20 @@ int main(void)
 
     srand(time(NULL));      // init random
 
-    setlocale(LC_CTYPE, "");
-    wchar_t star = 0x2660;
-    wprintf(L"%lc\n", star);
-
+    initButton();
+    //setlocale(LC_CTYPE, "");
+    //wchar_t star = 0x2660;
+    // wprintf(L"%lc\n", star);
 
     do
     {
+        
         createDeck(deck);
 
         printf("\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
 
         getHand(deck, hand);
         getUserChoiceAndDraw(deck, hand);
-        sortHand(hand);
         result = checkHandWinOrLose(hand);
         printf("\nResult= %d", result);
 
@@ -49,7 +52,7 @@ int main(void)
         {
             int key;
             printf("\nPress 'D' to Double or any other Key to Keep");
-            key = _getch();
+            key = waitButton();
             if((key == 'D') || (key =='d'))
             {
                 result = result * playDouble(deck);
@@ -58,9 +61,10 @@ int main(void)
         }
         printf("\nPress 'Space Bar' to Play Again or any other Key to Quit");
     }
-    while(_getch() == 32); // ASCII 'Space Bar'
+    while(waitButton() == 32); // ASCII 'Space Bar'
 
-    printf("\npoker END\n");    
+    printf("\npoker END\n");
+    closeButton();
     return 0;
 }
 
@@ -101,7 +105,7 @@ void getUserChoiceAndDraw(int *deck, int *hand)
     int selection;
     do 
     {
-        selection = _getch();
+        selection = waitButton();
         switch (selection)
         {
             case 49:  // ASCII 1
@@ -188,7 +192,8 @@ void reduceHand(int *hand)
 int checkHandWinOrLose(int *hand)
 {
     int result = Lose;
-
+    sortHand(hand);
+    
 // flush
     if(hand[0] >= DeuxCoeur && hand[4] <= AsCoeur)
         result = Flush;
@@ -315,7 +320,7 @@ int playDouble(int *deck)
     createDeck(deck);
     printf("\nPress 'H'igh or 'L'ow, any other key to keep");
     printf("\ndouble: %2d ", deck[1]);
-    key = _getch();
+    key = waitButton();
     printf(" --%2d ", deck[3]);
     if((key == 'H') || (key =='h'))
     {
@@ -333,4 +338,37 @@ int playDouble(int *deck)
 
     }
     return result;
+}
+
+int waitButton()
+{
+    return getc(stdin);
+    //char ch;
+    //scanf("%c", &ch);
+    //return (int)ch;
+
+}
+
+void initButton()
+{
+    // Setting the Attributes of the serial port using termios structure 
+	struct termios stdinSettings;	// Create the structure 
+	tcgetattr(STDIN_FILENO, &stdinSettings);	// Get the current attributes of the Serial port 
+    stdinSettingsOld = stdinSettings;
+
+	stdinSettings.c_lflag &= ~(ECHO | ECHOE | ISIG);  // Disable echo, Disable signal 
+    stdinSettings.c_lflag &= ~(ICANON);  // Non Cannonical mode
+	//stdinSettings.c_oflag &= ~OPOST;	// No Output Processing
+
+	// Setting Time outs 
+	stdinSettings.c_cc[VMIN] = 1; // Read at least X character(s) 
+	stdinSettings.c_cc[VTIME] = 0; // Wait 30 for 3sec (0 for indefinetly) 
+
+	if((tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettings)) != 0) // Set the attributes to the termios structure
+		printf("\n  Erreur! configuration des attributs du port serie");
+}
+
+void closeButton()
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettingsOld);
 }

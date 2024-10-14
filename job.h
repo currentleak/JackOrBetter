@@ -68,3 +68,6 @@ void sortHand(int *hand);
 void reduceHand(int *);
 int checkHandWinOrLose(int *hand);
 int playDouble(int *);
+int waitButton(void);
+void initButton(void);
+void closeButton(void);
