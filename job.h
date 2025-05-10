@@ -73,7 +73,9 @@
 #define DISCARD         1
 #define HOLD            0
 
+#define SpaceBar        32
 
+void clearScreen(void);
 void createDeck(int *deck);
 void getHand(int *deck, int *hand);
 void getUserChoiceAndDraw(int *deck, int *hand);

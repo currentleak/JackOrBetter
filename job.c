@@ -25,24 +25,52 @@ struct termios stdinSettingsOld;
 
 int main(void)
 {
-    int credit = 7;
-    int bet =1;
+    int credit = 10;
+    int bet = 1;
     int deck[52];
     int hand[5];
     int result;
+    int key;
 
-    srand(time(NULL));      // init random
+    srand(time(NULL));      // init random number generator
     setlocale(LC_CTYPE, "");
-    initButton();
+    initButton();         
 
     do
     {
-        createDeck(deck);
-        wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
-        wprintf(L"\nBet 'M'ore or 'L'ess, and press Space bar to draw");
-        //key = waitButton();
+        do
+        {
+            clearScreen();
+            wprintf(L"\nJack-Or-Better...                            Credit = %6d", credit);
+            wprintf(L"\nBet 'M'ore or 'L'ess, press 'Space Bar' to draw or 'Q' to quit");
+            wprintf(L"\nBet = %6d", bet);
+
+            key = waitButton();
+            if(key == 'M' || key == 'm')
+            {
+                if(credit >= 1)
+                {
+                    credit = credit -1;
+                    bet = bet +1;
+                }
+            }
+            else if(key == 'L' || key == 'l')
+            {
+                if(bet >= 2)
+                {
+                    bet = bet -1;
+                    credit = credit +1;
+                }
+            }
+        } while (key != 32); //'Q' || key != 'q' || key != SpaceBar);
+        
+
+        
 
         wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
+
+
+        createDeck(deck);
         getHand(deck, hand);
         credit = credit - bet;
         wprintf(L"\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
@@ -53,7 +81,7 @@ int main(void)
 
         if(result != Lose)
         {
-            int key;
+            
             wprintf(L"\nPress 'D' to Double or any other Key to Keep");
             key = waitButton();
             if((key == 'D') || (key =='d'))
@@ -71,11 +99,18 @@ int main(void)
         else
             wprintf(L"\nPress 'Space Bar' to Play Again or any other Key to Quit");
     }
-    while(waitButton() == 32 && credit > 0); // ASCII 'Space Bar'
+    while(waitButton() == SpaceBar && credit > 0); // ASCII 'Space Bar'
 
     wprintf(L"\npoker END\n");
     closeButton();
     return 0;
+}
+
+void clearScreen()
+{
+    wprintf(L"\e[1;1H\e[2J");
+    //const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
+    //write(STDOUT_FILENO, CLEAR_SCREEN_ANSI, 12);
 }
 
 /// @brief 
