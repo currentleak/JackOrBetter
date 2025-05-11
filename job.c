@@ -76,7 +76,7 @@ int main(void)
         wprintf(L"\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
         
         getUserChoiceAndDraw(deck, hand);
-        result = checkHandWinOrLose(hand);
+        result = bet * checkHandWinOrLose(hand);
         wprintf(L"\nResult= %d", result);
 
         if(result != Lose)
