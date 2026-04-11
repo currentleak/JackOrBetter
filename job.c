@@ -417,7 +417,7 @@ int playDouble(int *deck, int result)
         {
             break;  // user pressed any key to keep
         }
-        cardNumber = cardNumber + 2;  
+        cardNumber = cardNumber + 1;  
         if(cardNumber > 50)
         {
             break;
