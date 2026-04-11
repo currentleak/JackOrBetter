@@ -14,14 +14,16 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-//#include <conio.h>
-#include <unistd.h>
-//#include "ncurses.h"
 #include <wchar.h>
 #include <locale.h>
-#include <termios.h> // POSIX Terminal Control Definitions 
 
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <unistd.h>
+#include <termios.h> // POSIX Terminal Control Definitions
 struct termios stdinSettingsOld;
+#endif
 
 int main(void)
 {
@@ -48,9 +50,8 @@ int main(void)
             key = waitButton();
             if(key == 'M' || key == 'm')
             {
-                if(credit >= 1)
+                if(bet < credit)
                 {
-                    credit = credit -1;
                     bet = bet +1;
                 }
             }
@@ -59,10 +60,9 @@ int main(void)
                 if(bet >= 2)
                 {
                     bet = bet -1;
-                    credit = credit +1;
                 }
             }
-        } while (key != 32); //'Q' || key != 'q' || key != SpaceBar);
+        } while (key != 32 || bet > credit); //'Q' || key != 'q' || key != SpaceBar);
         
 
         
@@ -108,9 +108,13 @@ int main(void)
 
 void clearScreen()
 {
+#ifdef _WIN32
+    system("cls");
+#else
     wprintf(L"\e[1;1H\e[2J");
     //const char *CLEAR_SCREEN_ANSI = "\e[1;1H\e[2J";
     //write(STDOUT_FILENO, CLEAR_SCREEN_ANSI, 12);
+#endif
 }
 
 /// @brief 
@@ -243,6 +247,7 @@ int reduceCard (int card)
         {
             card = card - AsPique;
         }
+        return card;
 }
 void reduceHand(int *hand)
 {
@@ -382,7 +387,7 @@ int checkHandWinOrLose(int *hand)
 int playDouble(int *deck, int result)
 {
     int key;
-    int cardNumber = 13; //burn+5+burn+5
+    int cardNumber = 13; // burn+5+burn+5, first visible card of double sequence
     wprintf(L"\nPress 'H'igh or 'L'ow, any other key to keep");
     wprintf(L"\ndouble: ");
     printCard(deck[cardNumber]);
@@ -397,6 +402,11 @@ int playDouble(int *deck, int result)
             wprintf(L" -- ");*/
 
         key = waitButton();
+        if((cardNumber + 1) > 51)
+        {
+            break;
+        }
+
         printCard(deck[cardNumber + 1]);
 
         if((key == 'H') || (key =='h'))
@@ -417,7 +427,9 @@ int playDouble(int *deck, int result)
         {
             break;  // user pressed any key to keep
         }
-        cardNumber = cardNumber + 2;  
+
+        // Continue from the revealed card so all comparisons match visible cards.
+        cardNumber = cardNumber + 1;
         if(cardNumber > 50)
         {
             break;
@@ -430,12 +442,20 @@ int playDouble(int *deck, int result)
 
 int waitButton()
 {
+#ifdef _WIN32
+    return _getch();
+#else
     return getc(stdin);
+#endif
 }
 
 /// @brief settings pour le terminal en mode non canonique
 void initButton()
 {
+#ifdef _WIN32
+    // No terminal mode changes are needed when reading keys with _getch().
+    return;
+#else
     // Setting the Attributes of the serial port using termios structure 
 	struct termios stdinSettings;	// Create the structure 
 	tcgetattr(STDIN_FILENO, &stdinSettings);	// Get the current attributes of the Serial port 
@@ -451,11 +471,16 @@ void initButton()
 
 	if((tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettings)) != 0) // Set the attributes to the termios structure
 		wprintf(L"\n  Erreur! configuration des attributs du port serie");
+#endif
 }
 
 void closeButton()
 {
+#ifdef _WIN32
+    return;
+#else
     tcsetattr(STDIN_FILENO, TCSANOW, &stdinSettingsOld);
+#endif
 }
 
 /// @brief Imprime une carte, exemple: J♣
