@@ -427,9 +427,7 @@ int playDouble(int *deck, int result)
         {
             break;  // user pressed any key to keep
         }
-
-        // Continue from the revealed card so all comparisons match visible cards.
-        cardNumber = cardNumber + 1;
+        cardNumber = cardNumber + 1;  
         if(cardNumber > 50)
         {
             break;
