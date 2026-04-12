@@ -34,7 +34,7 @@ int main(void)
     int result;
     int key;
 
-    srand(time(NULL));      // init random number generator
+    srand((unsigned int)time(NULL));      // init random number generator
     setlocale(LC_CTYPE, "");
     initButton();         
 
@@ -65,14 +65,11 @@ int main(void)
         } while (key != 32 || bet > credit); //'Q' || key != 'q' || key != SpaceBar);
         
 
-        
-
-        wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
-
-
-        createDeck(deck);
-        getHand(deck, hand);
         credit = credit - bet;
+            wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
+
+            createDeck(deck);
+            getHand(deck, hand);
         wprintf(L"\nSelect Card(s) to Hold, Press 'Space Bar' to Draw");
         
         getUserChoiceAndDraw(deck, hand);
@@ -88,8 +85,14 @@ int main(void)
             {
                 result = playDouble(deck, result);
                 wprintf(L"\nResult= %d", result);
+                // Double mode risks the original wager: losing double means all is lost.
+                credit = credit + result;
             }
-            credit = credit + result;
+            else
+            {
+                // Keep mode: return wager + winnings from the original hand.
+                credit = credit + bet + result;
+            }
         }
         wprintf(L"\nJack-Or-Better...                      Credit=%6d", credit);
         if(credit == 0)
@@ -97,7 +100,7 @@ int main(void)
             wprintf(L"\nNo more credit!");
         }
         else
-            wprintf(L"\nPress 'Space Bar' to Play Again or any other Key to Quit");
+            wprintf(L"\nPress 'Space Bar' to Play Again or 'Q' to quit");
     }
     while(waitButton() == SpaceBar && credit > 0); // ASCII 'Space Bar'
 
@@ -279,7 +282,7 @@ int checkHandWinOrLose(int *hand)
 // straight flush
     if(result == Flush) 
     {
-        if ((hand[0] == hand[1] + 1) && (hand[1] == hand[2] + 1) && (hand[2] == hand[3] + 1) && (hand[3] == hand[4] + 1)) 
+        if ((hand[0] + 1 == hand[1]) && (hand[1] + 1 == hand[2]) && (hand[2] + 1 == hand[3]) && (hand[3] + 1 == hand[4])) 
         {
             result = StraightFlush;
 // Royal    
@@ -337,7 +340,7 @@ int checkHandWinOrLose(int *hand)
         }
     }
 // Straight
-    if((hand[0] == hand[1] + 1) && (hand[1] == hand[2] + 1) && (hand[2] == hand[3] + 1) && (hand[3] == hand[4] + 1))
+    if((hand[0] + 1 == hand[1]) && (hand[1] + 1 == hand[2]) && (hand[2] + 1 == hand[3]) && (hand[3] + 1 == hand[4]))
     {
         result = Straight;
     }
