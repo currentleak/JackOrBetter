@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/kevin.cotton/source/JackOrBetter",
-      "program": "c:/Users/kevin.cotton/source/JackOrBetter/build/Debug/outDebug",
+      "cwd": "\\\\wsl.localhost\\Ubuntu\\home\\kc\\JackOrBetter",
+      "program": "\\\\wsl.localhost\\Ubuntu\\home\\kc\\JackOrBetter\\build\\Debug\\outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
