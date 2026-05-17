@@ -269,86 +269,114 @@ void reduceHand(int *hand)
 int checkHandWinOrLose(int *hand)
 {
     int result = Lose;
+    int i;
+    int pairCount = 0;
+    int isThreeOfAKind = 0;
+    int isFourOfAKind = 0;
+    int isFullHouse = 0;
+    int isFlush = 0;
+    int isStraight = 0;
+    int isRoyal = 0;
+    int hasJackOrBetterPair = 0;
+
+    // Analyze suited/ordered hand first on raw deck values.
     sortHand(hand);
-// flush
-    if(hand[0] >= DeuxPique && hand[4] <= AsPique)
-        result = Flush;
-    else if(hand[0] >= DeuxCoeur && hand[4] <= AsCoeur)
-        result = Flush;
-    else if(hand[0] >= DeuxCarreau && hand[4] <= AsCarreau)
-        result = Flush;
-    else if(hand[0] >= DeuxTrefle && hand[4] <= AsTrefle)
-        result = Flush;
-// straight flush
-    if(result == Flush) 
+    if((hand[0] >= DeuxPique && hand[4] <= AsPique) ||
+       (hand[0] >= DeuxCoeur && hand[4] <= AsCoeur) ||
+       (hand[0] >= DeuxCarreau && hand[4] <= AsCarreau) ||
+       (hand[0] >= DeuxTrefle && hand[4] <= AsTrefle))
     {
-        if ((hand[0] + 1 == hand[1]) && (hand[1] + 1 == hand[2]) && (hand[2] + 1 == hand[3]) && (hand[3] + 1 == hand[4])) 
+        isFlush = 1;
+    }
+
+    // Reduce ranks (2..A) independently of suit for pair/straight set analysis.
+    reduceHand(hand);
+    sortHand(hand);
+
+    if((hand[0] + 1 == hand[1]) && (hand[1] + 1 == hand[2]) && (hand[2] + 1 == hand[3]) && (hand[3] + 1 == hand[4]))
+    {
+        isStraight = 1;
+    }
+    else if((hand[0] == 1) && (hand[1] == 2) && (hand[2] == 3) && (hand[3] == 4) && (hand[4] == 13))
+    {
+        isStraight = 1;
+    }
+
+    if(isFlush && isStraight && hand[4] == AsPique)
+    {
+        isRoyal = 1;
+    }
+
+    for(i = 0; i < 4; i++)
+    {
+        if(hand[i] == hand[i + 1])
         {
-            result = StraightFlush;
-// Royal    
-            if(hand[4] == AsPique || hand[4] == AsCoeur || hand[4] == AsCarreau || hand[4] == AsTrefle)
+            pairCount++;
+            if(hand[i] >= JackPique)
             {
-                result = RoyalFlush;
+                hasJackOrBetterPair = 1;
             }
         }
     }
 
-// Reduced Hand
-    reduceHand(hand);
-    sortHand(hand);
-// Jack or Better 
-    int i;
-    for(i = 0; i < 4; i++)
-    {
-        if(hand[i] == hand[i+1])
-        {
-            if(hand[i] > DixPique)
-            {
-                result = JackOrBetter;
-            }
-        }
-    }
-// two pairs
-    if(hand[0] == hand[1])
-    {
-        if((hand[2] == hand[3]) || (hand[3] == hand[4]))
-        {
-            result = TwoPairs;
-        }
-    }
-    else if (hand[1] == hand[2])
-    {
-        if(hand[3] == hand[4])
-        {
-            result = TwoPairs;
-        }
-    }
-// Three of a kind
     for(i = 0; i < 3; i++)
     {
-        if((hand[i] == hand[i+1]) && (hand[i+1] == hand[i+2]))
+        if((hand[i] == hand[i + 1]) && (hand[i + 1] == hand[i + 2]))
         {
-            result = ThreeOfAKind;
+            isThreeOfAKind = 1;
+            break;
         }
     }
-// Four of a kind
+
     for(i = 0; i < 2; i++)
     {
-        if((hand[i] == hand[i+1]) && (hand[i+1] == hand[i+2]) && (hand[i+2] == hand[i+3]))
+        if((hand[i] == hand[i + 1]) && (hand[i + 1] == hand[i + 2]) && (hand[i + 2] == hand[i + 3]))
         {
-            result = FourOfAKind;
+            isFourOfAKind = 1;
+            break;
         }
     }
-// Straight
-    if((hand[0] + 1 == hand[1]) && (hand[1] + 1 == hand[2]) && (hand[2] + 1 == hand[3]) && (hand[3] + 1 == hand[4]))
+
+    if(isThreeOfAKind && pairCount == 3 && !isFourOfAKind)
+    {
+        isFullHouse = 1;
+    }
+
+    if(isRoyal)
+    {
+        result = RoyalFlush;
+    }
+    else if(isFlush && isStraight)
+    {
+        result = StraightFlush;
+    }
+    else if(isFourOfAKind)
+    {
+        result = FourOfAKind;
+    }
+    else if(isFullHouse)
+    {
+        result = FullHouse;
+    }
+    else if(isFlush)
+    {
+        result = Flush;
+    }
+    else if(isStraight)
     {
         result = Straight;
     }
-// Full House
-    if(((hand[0] == hand[1]) && (hand[1] == hand[2]) && (hand[3] == hand[4])) ||
-     ((hand[0] == hand[1]) && (hand[2] == hand[3]) && (hand[3] == hand[4])) )
+    else if(isThreeOfAKind)
     {
-        result = FullHouse;
+        result = ThreeOfAKind;
+    }
+    else if(pairCount == 2)
+    {
+        result = TwoPairs;
+    }
+    else if(hasJackOrBetterPair)
+    {
+        result = JackOrBetter;
     }
 
     switch (result)
