@@ -1,0 +1,11 @@
+Simulation sur 1000000 mains (on garde toutes les mains gagnantes au 1er tirage):
+Total misé: 1000000
+Total retour: 605097
+Taux de retour (RTP): 60.51 %
+Perte moyenne par main: 0.3949
+
+Simulation avec double sur mains gagnantes:
+Regle double: H si carte <= 6, L si carte >= 9, garder si 7-8
+Total retour (avec double): 24270856
+Taux de retour (RTP, avec double): 2427.09 %
+Perte moyenne par main (avec double): -23.2709
